@@ -1,0 +1,7 @@
+appId: com.expoproduction.unlockthecat
+---
+- launchApp:
+    clearState: true
+- assertVisible: 'Mystery Cat'
+- tapOn:
+    id: 'unlock-cat-button'

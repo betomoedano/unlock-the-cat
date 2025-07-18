@@ -1,0 +1,65 @@
+name: continuous-deploy-fingerprint
+
+jobs:
+  fingerprint:
+    type: fingerprint
+
+  android_get_build:
+    needs: [fingerprint]
+    type: get-build
+    params:
+      fingerprint_hash: ${{ needs.fingerprint.outputs.android_fingerprint_hash }}
+      platform: android
+
+  android_repack:
+    needs: [android_get_build]
+    if: ${{ needs.android_get_build.outputs.build_id }}
+    type: repack
+    params:
+      build_id: ${{ needs.android_get_build.outputs.build_id }}
+
+  android_build:
+    needs: [android_get_build]
+    if: ${{ !needs.android_get_build.outputs.build_id }}
+    type: build
+    params:
+      platform: android
+      profile: e2e-test
+
+  android_maestro:
+    after: [android_repack, android_build]
+    type: maestro
+    image: latest
+    params:
+      build_id: ${{ needs.android_repack.outputs.build_id || needs.android_build.outputs.build_id }}
+      flow_path: ["maestro-workspace/subscription-flow.yaml"]
+
+  ios_get_build:
+    needs: [fingerprint]
+    type: get-build
+    params:
+      fingerprint_hash: ${{ needs.fingerprint.outputs.ios_fingerprint_hash }}
+      platform: ios
+
+  ios_repack:
+    needs: [ios_get_build]
+    if: ${{ needs.ios_get_build.outputs.build_id }}
+    type: repack
+    params:
+      build_id: ${{ needs.ios_get_build.outputs.build_id }}
+
+  ios_build:
+    needs: [ios_get_build]
+    if: ${{ !needs.ios_get_build.outputs.build_id }}
+    type: build
+    params:
+      platform: ios
+      profile: e2e-test
+
+  ios_maestro:
+    after: [ios_repack, ios_build]
+    type: maestro
+    image: latest
+    params:
+      build_id: ${{ needs.ios_repack.outputs.build_id || needs.ios_build.outputs.build_id }}
+      flow_path: ["maestro-workspace/subscription-flow.yaml"]

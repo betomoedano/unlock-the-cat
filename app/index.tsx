@@ -85,7 +85,7 @@ export default function Index() {
               Unlock unlimited access to adorable cats
             </Text>
 
-            <Link href="/subscription" asChild>
+            <Link href="/subscription" asChild testID="unlock-cat-button">
               <TouchableOpacity style={styles.unlockButton}>
                 <LinearGradient
                   colors={["#e94560", "#f27121"]}
